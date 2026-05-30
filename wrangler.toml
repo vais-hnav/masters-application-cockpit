@@ -1,0 +1,13 @@
+name = "masters-planning"
+compatibility_date = "2026-05-30"
+pages_build_output_dir = "dist"
+send_metrics = false
+
+[[d1_databases]]
+binding = "DB"
+database_name = "masters-planning"
+database_id = "33f9af04-7a6c-4d29-9871-4037cccda48f"
+migrations_dir = "migrations"
+
+[vars]
+APP_ENV = "production"

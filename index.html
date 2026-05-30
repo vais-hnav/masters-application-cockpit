@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Masters Planning</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <section class="mode-gate" id="modeGate" aria-label="Choose app mode">
+      <div class="gate-panel">
+        <div class="gate-flag" aria-hidden="true">
+          <div class="flag-wave flag-wave-large"></div>
+        </div>
+        <p class="eyebrow">Masters Planning</p>
+        <h1>Germany applications cockpit</h1>
+        <p class="gate-copy">Open the workbook as a read-only planning board or enter edit mode to update rows directly in the app.</p>
+        <div class="mode-actions">
+          <button class="primary-button" id="enterViewMode" type="button">View mode</button>
+          <button class="quiet-button" id="enterEditMode" type="button">Edit mode</button>
+        </div>
+      </div>
+    </section>
+
+    <div class="app-shell">
+      <aside class="workspace-panel" aria-label="Planning controls">
+        <div class="brand-block">
+          <p class="eyebrow">Masters Planning</p>
+          <h1>Applications cockpit</h1>
+          <div class="germany-card" aria-label="Germany is the default view">
+            <div class="flag-wave" aria-hidden="true"></div>
+            <div>
+              <p class="flag-label">Germany desk</p>
+              <p class="flag-copy">Default workspace</p>
+            </div>
+          </div>
+          <p class="source-note" id="sourceNote">Loading workbook data...</p>
+        </div>
+
+        <div class="control-group">
+          <label for="countryFilter">Country</label>
+          <select id="countryFilter"></select>
+        </div>
+
+        <div class="control-group">
+          <label for="bandFilter">Outcome</label>
+          <select id="bandFilter"></select>
+        </div>
+
+        <div class="control-group">
+          <label for="sortFilter">Sort</label>
+          <select id="sortFilter">
+            <option value="group">Outcome groups</option>
+            <option value="deadline">Deadline soonest</option>
+            <option value="university">University A-Z</option>
+            <option value="country">Country then university</option>
+            <option value="row">Workbook order</option>
+          </select>
+        </div>
+
+        <div class="actions-grid">
+          <button class="quiet-button" id="modeButton" type="button" title="Switch app mode">
+            Mode
+          </button>
+          <button class="quiet-button" id="resetButton" type="button" title="Reset local edits">
+            <span aria-hidden="true">&#8634;</span>
+            Reset
+          </button>
+          <button class="quiet-button" id="exportButton" type="button" title="Export visible rows">
+            <span aria-hidden="true">&#8681;</span>
+            CSV
+          </button>
+        </div>
+      </aside>
+
+      <main class="content-panel">
+        <header class="topbar">
+          <div class="search-wrap">
+            <span aria-hidden="true">&#8981;</span>
+            <input id="searchInput" type="search" placeholder="Search university, course, outcome, website..." />
+          </div>
+        </header>
+
+        <section class="snapshot" id="snapshot" aria-label="Planning summary"></section>
+
+        <section class="lane-strip" id="laneStrip" aria-label="Outcome summary"></section>
+
+        <section class="results-meta">
+          <div>
+            <p class="eyebrow">Showing</p>
+            <h2 id="resultCount">0 programs</h2>
+          </div>
+          <p id="activeContext">Use the filters to focus the planning list.</p>
+        </section>
+
+        <section id="cardsView" class="cards-view" aria-live="polite"></section>
+      </main>
+    </div>
+
+    <dialog id="editorDialog" class="editor-dialog">
+      <form method="dialog" class="editor-form" id="editorForm">
+        <div class="dialog-head">
+          <div>
+            <p class="eyebrow" id="editorMeta">Edit program</p>
+            <h2 id="editorTitle">Program</h2>
+          </div>
+          <button class="icon-button" value="cancel" aria-label="Close editor" title="Close">&times;</button>
+        </div>
+
+        <div class="editor-grid" id="editorFields"></div>
+
+        <div class="dialog-actions">
+          <button class="quiet-button" value="cancel" type="submit">Cancel</button>
+          <button class="primary-button" id="saveEditorButton" value="default" type="button">
+            <span aria-hidden="true">&#10003;</span>
+            Save changes
+          </button>
+        </div>
+      </form>
+    </dialog>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+    <script src="data/masters-data.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>

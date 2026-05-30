@@ -1,0 +1,4 @@
+# Optional fallback for write protection if you do not use Cloudflare Access.
+# Set the real value in Cloudflare Pages > Settings > Environment variables
+# or in a local .dev.vars file that is not committed.
+EDIT_TOKEN=replace-with-a-long-random-secret
