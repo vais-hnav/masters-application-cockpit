@@ -5,7 +5,7 @@
   "description": "Cloudflare Pages + D1 application planner.",
   "scripts": {
     "data:extract": "python3 tools/extract_workbook.py",
-    "build": "python3 tools/build_static.py",
+    "build": "node tools/build_static.mjs",
     "db:seed-file": "python3 tools/build_seed_sql.py",
     "db:create": "wrangler d1 create masters-planning",
     "db:migrate:local": "wrangler d1 migrations apply DB --local",
@@ -13,7 +13,7 @@
     "db:seed:local": "wrangler d1 execute DB --local --file=seed.sql",
     "db:seed:remote": "wrangler d1 execute DB --remote --file=seed.sql",
     "dev": "npm run build && wrangler pages dev dist",
-    "deploy": "npm run build && wrangler pages deploy dist --project-name masters-planning"
+    "deploy": "git push"
   },
   "devDependencies": {
     "wrangler": "^4.0.0"

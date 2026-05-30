@@ -17,7 +17,13 @@ This app is now set up for Cloudflare Pages + Pages Functions + D1.
 
 Install Node.js first if `node` / `npm` are not available on your machine.
 
-Use Git deployment or Wrangler for this project. Do not use the dashboard drag-and-drop upload, because Pages Functions are required for editing.
+Use Git deployment for this project. Do not use the dashboard drag-and-drop upload, because Pages Functions and D1 bindings are required for editing.
+
+Cloudflare Pages settings for the connected GitHub repo:
+
+- Production branch: `main`
+- Build command: `npm run build`
+- Build output directory: `dist`
 
 ```bash
 cd "/Users/vaishnav/Documents/masters planning data"
@@ -37,10 +43,9 @@ Then create the tables and import the workbook data:
 ```bash
 npm run db:migrate:remote
 npm run db:seed:remote
-npm run deploy
 ```
 
-The deploy command builds `dist/` first, so Cloudflare only receives the public app files. The schema, seed file, and helper scripts are kept out of the hosted static assets.
+After this, push to `main` on GitHub. Cloudflare Pages will build `dist/` and deploy from the GitHub push.
 
 ## Local Cloudflare Dev
 
