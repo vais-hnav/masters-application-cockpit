@@ -2,7 +2,6 @@ const jsonHeaders = {
   "content-type": "application/json; charset=utf-8",
   "cache-control": "no-store",
 };
-const EDIT_PASSWORD = "Deskjet@1000";
 
 export async function onRequest(context) {
   const { request, env, params } = context;
@@ -259,8 +258,8 @@ function canWrite(request, env, url, body = null) {
   }
 
   const auth = request.headers.get("authorization") || "";
-  if (auth === `Bearer ${EDIT_PASSWORD}` || body?.password === EDIT_PASSWORD) {
-    return { allowed: true, user: "static-password" };
+  if (env.EDIT_PASSWORD && (auth === `Bearer ${env.EDIT_PASSWORD}` || body?.password === env.EDIT_PASSWORD)) {
+    return { allowed: true, user: "edit-password" };
   }
 
   if (["localhost", "127.0.0.1", "::1", "[::1]"].includes(url.hostname)) {

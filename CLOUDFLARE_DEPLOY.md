@@ -70,13 +70,21 @@ This resets the D1 data back to the latest workbook extract. Use it carefully be
 
 Clicking **Edit mode** asks for the edit password before the app unlocks editable controls.
 
-Current password:
+The password is stored as the Cloudflare Pages environment secret `EDIT_PASSWORD`.
+
+Current deployed value:
 
 ```text
 Deskjet@1000
 ```
 
-The password is checked by the Cloudflare Function before edit mode unlocks and again when saving a row. No Cloudflare secret is required for the default deployment.
+Set or rotate it with:
+
+```bash
+printf 'Deskjet@1000' | npx wrangler pages secret put EDIT_PASSWORD --project-name masters-planning
+```
+
+The password is checked by the Cloudflare Function before edit mode unlocks and again when saving a row.
 
 For stronger protection later, put the app behind Cloudflare Access:
 
