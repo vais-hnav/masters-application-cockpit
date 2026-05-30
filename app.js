@@ -18,7 +18,6 @@
     searchInput: document.getElementById("searchInput"),
     resetButton: document.getElementById("resetButton"),
     exportButton: document.getElementById("exportButton"),
-    snapshot: document.getElementById("snapshot"),
     laneStrip: document.getElementById("laneStrip"),
     resultCount: document.getElementById("resultCount"),
     activeContext: document.getElementById("activeContext"),
@@ -232,7 +231,6 @@
   function render() {
     const allRows = currentRows();
     const visibleRows = filterRows(allRows);
-    renderSnapshot(visibleRows);
     renderLaneStrip(allRows);
     renderResultsMeta(visibleRows);
     renderCards(visibleRows);
@@ -247,7 +245,6 @@
         ...row,
         fields,
         sourceBand: band,
-        edited: Boolean(edits[row.id]),
       };
     });
   }
@@ -314,34 +311,6 @@
       action: 4,
     };
     return order[row.sourceBand.key] ?? 9;
-  }
-
-  function renderSnapshot(rows) {
-    const admits = rows.filter((row) => row.sourceBand.key === "admit").length;
-    const rejected = rows.filter((row) => row.sourceBand.key === "rejected").length;
-    const waiting = rows.filter((row) => row.sourceBand.key === "waiting").length;
-    const skipped = rows.filter((row) => row.sourceBand.key === "skipped").length;
-    const action = rows.filter((row) => row.sourceBand.key === "action").length;
-    const upcoming = rows.filter((row) => {
-      const timestamp = sortableDate(field(row, "deadline") || field(row, "enrollmentDeadline"));
-      const today = startOfToday();
-      const horizon = today + 1000 * 60 * 60 * 24 * 45;
-      return timestamp >= today && timestamp <= horizon;
-    }).length;
-    const edited = rows.filter((row) => row.edited).length;
-
-    els.snapshot.innerHTML = [
-      metric("Programs", rows.length, "Currently visible"),
-      metric("Accepted", admits, "Confirmed"),
-      metric("Waiting", waiting, "Awaiting replies"),
-      metric("Rejected", rejected, "Closed"),
-      metric("Skipped", skipped, "Not pursuing"),
-      metric("Action", action, edited ? `${edited} edited` : "Needs work"),
-    ].join("");
-  }
-
-  function metric(label, value, hint) {
-    return `<article class="metric"><strong>${value}</strong><span>${escapeHtml(label)} &middot; ${escapeHtml(hint)}</span></article>`;
   }
 
   function renderLaneStrip(rows) {
@@ -676,11 +645,6 @@
       return Number.MAX_SAFE_INTEGER;
     }
     return Date.parse(`${value}T00:00:00`);
-  }
-
-  function startOfToday() {
-    const now = new Date();
-    return new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
   }
 
   function formatDisplayDate(value) {

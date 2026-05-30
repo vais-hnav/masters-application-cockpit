@@ -438,40 +438,6 @@ textarea:focus {
   box-shadow: none;
 }
 
-.snapshot {
-  display: grid;
-  grid-template-columns: repeat(6, minmax(130px, 1fr));
-  gap: 12px;
-  margin-bottom: 18px;
-}
-
-.metric {
-  min-height: 104px;
-  padding: 16px;
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  background:
-    linear-gradient(145deg, rgba(255, 255, 255, 0.062), rgba(255, 255, 255, 0.016)),
-    var(--panel);
-  box-shadow:
-    0 18px 50px rgba(0, 0, 0, 0.42),
-    inset 0 1px 0 rgba(255, 255, 255, 0.035);
-}
-
-.metric strong {
-  display: block;
-  margin-bottom: 7px;
-  font-size: 2rem;
-  line-height: 1;
-  text-shadow: 0 0 24px rgba(111, 126, 255, 0.22);
-}
-
-.metric span {
-  color: var(--muted);
-  font-size: 0.84rem;
-  font-weight: 800;
-}
-
 .lane-strip {
   display: grid;
   grid-template-columns: repeat(4, minmax(170px, 1fr));
@@ -906,10 +872,6 @@ textarea:focus {
 }
 
 @media (max-width: 1180px) {
-  .snapshot {
-    grid-template-columns: repeat(3, minmax(140px, 1fr));
-  }
-
   .lane-strip {
     grid-template-columns: repeat(2, minmax(170px, 1fr));
   }
@@ -953,7 +915,6 @@ textarea:focus {
     flex-direction: column;
   }
 
-  .snapshot,
   .lane-strip,
   .cards-view {
     grid-template-columns: 1fr;
