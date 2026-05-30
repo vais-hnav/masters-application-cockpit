@@ -66,30 +66,24 @@ npm run db:seed:remote
 
 This resets the D1 data back to the latest workbook extract. Use it carefully because it replaces current rows.
 
-## Editing Security
+## Editing Password
 
-Best option: protect the whole deployed Pages app with Cloudflare Access.
+Clicking **Edit mode** asks for the edit password before the app unlocks editable controls.
+
+Current password:
+
+```text
+Deskjet@1000
+```
+
+The password is checked by the Cloudflare Function before edit mode unlocks and again when saving a row. No Cloudflare secret is required for the default deployment.
+
+For stronger protection later, put the app behind Cloudflare Access:
 
 1. Cloudflare Dashboard -> Zero Trust -> Access -> Applications.
 2. Add a self-hosted application for your Pages hostname.
 3. Allow only your email.
 4. Redeploy or reopen the app.
-
-The API accepts edits when Cloudflare Access sends the authenticated email header.
-
-Fallback option: set an `EDIT_TOKEN` environment variable in Cloudflare Pages:
-
-1. Cloudflare Dashboard -> Workers & Pages -> your Pages project.
-2. Settings -> Environment variables.
-3. Add `EDIT_TOKEN` as a secret value.
-4. When the app asks for the edit token, paste it once. It is stored only in browser session storage.
-
-For this deployment, an `EDIT_TOKEN` secret has already been created and a local copy is stored in `.edit-token`.
-Use this command to view it:
-
-```bash
-cat .edit-token
-```
 
 ## API Routes
 

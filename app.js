@@ -3,6 +3,7 @@
 
   const LOCAL_DATA = window.MASTERS_DATA;
   const STORAGE_KEY = "masters-planning-edits-v1";
+  const PASSWORD_STORAGE_KEY = "masters-planning-edit-password";
   const API_BASE = "/api";
 
   const els = {
@@ -37,7 +38,7 @@
   let edits = readEdits();
   let activeEditorId = null;
   let usingDatabase = false;
-  let editToken = sessionStorage.getItem("masters-planning-edit-token") || "";
+  let editPassword = sessionStorage.getItem(PASSWORD_STORAGE_KEY) || "";
   const state = {
     mode: null,
     country: LOCAL_DATA?.defaultCountry || "Germany",
@@ -134,7 +135,7 @@
 
   function bindEvents() {
     els.enterViewMode.addEventListener("click", () => enterMode("view"));
-    els.enterEditMode.addEventListener("click", () => enterMode("edit"));
+    els.enterEditMode.addEventListener("click", requestEditMode);
     els.modeButton.addEventListener("click", () => {
       els.modeGate.hidden = false;
       document.body.classList.remove("has-entered");
@@ -179,6 +180,53 @@
     els.resetButton.disabled = mode !== "edit";
     render();
     showToast(mode === "edit" ? "Edit mode enabled." : "View mode enabled.");
+  }
+
+  async function requestEditMode() {
+    const password = window.prompt("Enter edit password.");
+    if (password === null) {
+      return;
+    }
+    if (!password.trim()) {
+      showToast("Password is required for edit mode.");
+      return;
+    }
+
+    if (!usingDatabase) {
+      editPassword = password;
+      sessionStorage.setItem(PASSWORD_STORAGE_KEY, editPassword);
+      enterMode("edit");
+      return;
+    }
+
+    els.enterEditMode.disabled = true;
+    try {
+      await validateEditPassword(password);
+      editPassword = password;
+      sessionStorage.setItem(PASSWORD_STORAGE_KEY, editPassword);
+      enterMode("edit");
+    } catch (error) {
+      editPassword = "";
+      sessionStorage.removeItem(PASSWORD_STORAGE_KEY);
+      showToast(error.message || "Wrong password.");
+    } finally {
+      els.enterEditMode.disabled = false;
+    }
+  }
+
+  async function validateEditPassword(password) {
+    const response = await fetch(`${API_BASE}/auth`, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        accept: "application/json",
+      },
+      body: JSON.stringify({ password }),
+    });
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok || !payload.ok) {
+      throw new Error(payload.error || "Wrong password.");
+    }
   }
 
   function render() {
@@ -504,14 +552,16 @@
     }
   }
 
-  async function saveCloudRow(rowId, fields, bandKey, allowTokenPrompt = true) {
+  async function saveCloudRow(rowId, fields, bandKey) {
+    if (!editPassword) {
+      throw new Error("Enter edit mode again to unlock saving.");
+    }
+
     const headers = {
       "content-type": "application/json",
       accept: "application/json",
+      authorization: `Bearer ${editPassword}`,
     };
-    if (editToken) {
-      headers.authorization = `Bearer ${editToken}`;
-    }
 
     const response = await fetch(`${API_BASE}/programs/${encodeURIComponent(rowId)}`, {
       method: "PATCH",
@@ -519,15 +569,6 @@
       body: JSON.stringify({ fields, bandKey }),
     });
     const payload = await response.json().catch(() => ({}));
-
-    if (response.status === 403 && allowTokenPrompt) {
-      const token = window.prompt("Enter your edit token for this Cloudflare app.");
-      if (token && token.trim()) {
-        editToken = token.trim();
-        sessionStorage.setItem("masters-planning-edit-token", editToken);
-        return saveCloudRow(rowId, fields, bandKey, false);
-      }
-    }
 
     if (!response.ok) {
       throw new Error(payload.error || "Could not save this row.");

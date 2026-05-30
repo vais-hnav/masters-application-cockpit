@@ -3,5 +3,4 @@
 dist/
 node_modules/
 .dev.vars
-.edit-token
 *.log

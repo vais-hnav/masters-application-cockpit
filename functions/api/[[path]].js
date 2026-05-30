@@ -2,6 +2,7 @@ const jsonHeaders = {
   "content-type": "application/json; charset=utf-8",
   "cache-control": "no-store",
 };
+const EDIT_PASSWORD = "Deskjet@1000";
 
 export async function onRequest(context) {
   const { request, env, params } = context;
@@ -27,6 +28,14 @@ export async function onRequest(context) {
 
     if (request.method === "GET" && path === "programs") {
       return json(await loadPrograms(env, url.searchParams.get("country")));
+    }
+
+    if (request.method === "POST" && path === "auth") {
+      const auth = canWrite(request, env, url, await readJson(request));
+      if (!auth.allowed) {
+        return json({ ok: false, error: "Wrong password." }, 403);
+      }
+      return json({ ok: true });
     }
 
     const programMatch = path.match(/^programs\/([^/]+)$/);
@@ -243,15 +252,15 @@ function buildLinks(fields, columns) {
     .filter((link) => /^https?:\/\//i.test(link.url));
 }
 
-function canWrite(request, env, url) {
+function canWrite(request, env, url, body = null) {
   const accessUser = request.headers.get("cf-access-authenticated-user-email");
   if (accessUser) {
     return { allowed: true, user: accessUser };
   }
 
   const auth = request.headers.get("authorization") || "";
-  if (env.EDIT_TOKEN && auth === `Bearer ${env.EDIT_TOKEN}`) {
-    return { allowed: true, user: "edit-token" };
+  if (auth === `Bearer ${EDIT_PASSWORD}` || body?.password === EDIT_PASSWORD) {
+    return { allowed: true, user: "static-password" };
   }
 
   if (["localhost", "127.0.0.1", "::1", "[::1]"].includes(url.hostname)) {
@@ -260,6 +269,6 @@ function canWrite(request, env, url) {
 
   return {
     allowed: false,
-    reason: "Editing requires Cloudflare Access or EDIT_TOKEN.",
+    reason: "Wrong password.",
   };
 }
