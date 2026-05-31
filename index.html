@@ -14,10 +14,10 @@
         </div>
         <p class="eyebrow">Masters Planning</p>
         <h1>Germany applications cockpit</h1>
-        <p class="gate-copy">Review applications safely, or unlock editing when you need to update application details.</p>
+        <p class="gate-copy">Open the workbook as a read-only planning board or enter edit mode to update rows directly in the app.</p>
         <div class="mode-actions">
-          <button class="primary-button" id="enterViewMode" type="button">View only</button>
-          <button class="quiet-button" id="enterEditMode" type="button">Edit list</button>
+          <button class="primary-button" id="enterViewMode" type="button">View mode</button>
+          <button class="quiet-button" id="enterEditMode" type="button">Edit mode</button>
         </div>
       </div>
     </section>
@@ -26,15 +26,15 @@
       <aside class="workspace-panel" aria-label="Planning controls">
         <div class="brand-block">
           <p class="eyebrow">Masters Planning</p>
-          <h1>Application list</h1>
+          <h1>Applications cockpit</h1>
           <div class="germany-card" aria-label="Germany is the default view">
             <div class="flag-wave" aria-hidden="true"></div>
             <div>
-              <p class="flag-label">Germany first</p>
-              <p class="flag-copy">Opens by default</p>
+              <p class="flag-label">Germany desk</p>
+              <p class="flag-copy">Default workspace</p>
             </div>
           </div>
-          <p class="source-note" id="sourceNote">Loading applications...</p>
+          <p class="source-note" id="sourceNote">Loading workbook data...</p>
         </div>
 
         <div class="control-group">
@@ -43,32 +43,32 @@
         </div>
 
         <div class="control-group">
-          <label for="bandFilter">Application status</label>
+          <label for="bandFilter">Outcome</label>
           <select id="bandFilter"></select>
         </div>
 
         <div class="control-group">
-          <label for="sortFilter">Sort by</label>
+          <label for="sortFilter">Sort</label>
           <select id="sortFilter">
-            <option value="group">Status groups</option>
-            <option value="deadline">Nearest deadline</option>
+            <option value="group">Outcome groups</option>
+            <option value="deadline">Deadline soonest</option>
             <option value="university">University A-Z</option>
             <option value="country">Country then university</option>
-            <option value="row">Original order</option>
+            <option value="row">Workbook order</option>
           </select>
         </div>
 
         <div class="actions-grid">
           <button class="quiet-button" id="modeButton" type="button" title="Switch app mode">
-            Change mode
+            Mode
           </button>
-          <button class="quiet-button" id="resetButton" type="button" title="Clear saved changes">
+          <button class="quiet-button" id="resetButton" type="button" title="Reset local edits">
             <span aria-hidden="true">&#8634;</span>
-            Clear edits
+            Reset
           </button>
-          <button class="quiet-button" id="exportButton" type="button" title="Download visible applications">
+          <button class="quiet-button" id="exportButton" type="button" title="Export visible rows">
             <span aria-hidden="true">&#8681;</span>
-            Download copy
+            CSV
           </button>
         </div>
       </aside>
@@ -77,52 +77,30 @@
         <header class="topbar">
           <div class="search-wrap">
             <span aria-hidden="true">&#8981;</span>
-            <input id="searchInput" type="search" placeholder="Search university, course, country, or status..." />
+            <input id="searchInput" type="search" placeholder="Search university, course, outcome, website..." />
           </div>
         </header>
 
-        <section class="lane-strip" id="laneStrip" aria-label="Status summary"></section>
+        <section class="lane-strip" id="laneStrip" aria-label="Outcome summary"></section>
 
         <section class="results-meta">
           <div>
             <p class="eyebrow">Showing</p>
-            <h2 id="resultCount">0 applications</h2>
+            <h2 id="resultCount">0 programs</h2>
           </div>
-          <p id="activeContext">Showing Germany first.</p>
+          <p id="activeContext">Use the filters to focus the planning list.</p>
         </section>
 
         <section id="cardsView" class="cards-view" aria-live="polite"></section>
       </main>
     </div>
 
-    <dialog id="passwordDialog" class="editor-dialog password-dialog">
-      <form class="editor-form password-form" id="passwordForm">
-        <div class="dialog-head">
-          <div>
-            <p class="eyebrow">Edit mode</p>
-            <h2>Enter password</h2>
-          </div>
-          <button class="icon-button" id="cancelPasswordButton" type="button" aria-label="Close password dialog" title="Close">&times;</button>
-        </div>
-
-        <div class="field-editor is-wide">
-          <label for="passwordInput">Password</label>
-          <input id="passwordInput" type="password" autocomplete="current-password" />
-        </div>
-
-        <div class="dialog-actions">
-          <button class="quiet-button" id="cancelPasswordAction" type="button">Cancel</button>
-          <button class="primary-button" id="unlockEditButton" type="submit">Unlock editing</button>
-        </div>
-      </form>
-    </dialog>
-
     <dialog id="editorDialog" class="editor-dialog">
       <form method="dialog" class="editor-form" id="editorForm">
         <div class="dialog-head">
           <div>
-            <p class="eyebrow" id="editorMeta">Edit application</p>
-            <h2 id="editorTitle">Application</h2>
+            <p class="eyebrow" id="editorMeta">Edit program</p>
+            <h2 id="editorTitle">Program</h2>
           </div>
           <button class="icon-button" value="cancel" aria-label="Close editor" title="Close">&times;</button>
         </div>

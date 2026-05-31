@@ -343,14 +343,9 @@ textarea:focus {
 
 .actions-grid {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: repeat(3, 1fr);
   gap: 10px;
   margin-top: auto;
-}
-
-.actions-grid .quiet-button {
-  justify-content: flex-start;
-  min-height: 44px;
 }
 
 .quiet-button,
@@ -803,14 +798,6 @@ textarea:focus {
   color: var(--ink);
   box-shadow: var(--shadow), 0 0 54px rgba(97, 133, 255, 0.13);
   overflow: hidden;
-}
-
-.password-dialog {
-  width: min(460px, calc(100vw - 28px));
-}
-
-.password-form {
-  gap: 16px;
 }
 
 .editor-dialog::backdrop {

@@ -22,12 +22,6 @@
     resultCount: document.getElementById("resultCount"),
     activeContext: document.getElementById("activeContext"),
     cardsView: document.getElementById("cardsView"),
-    passwordDialog: document.getElementById("passwordDialog"),
-    passwordForm: document.getElementById("passwordForm"),
-    passwordInput: document.getElementById("passwordInput"),
-    cancelPasswordButton: document.getElementById("cancelPasswordButton"),
-    cancelPasswordAction: document.getElementById("cancelPasswordAction"),
-    unlockEditButton: document.getElementById("unlockEditButton"),
     editorDialog: document.getElementById("editorDialog"),
     editorForm: document.getElementById("editorForm"),
     editorMeta: document.getElementById("editorMeta"),
@@ -124,7 +118,7 @@
       .join("");
     els.countryFilter.value = state.country;
 
-    const bandOptions = [`<option value="all">All statuses</option>`];
+    const bandOptions = [`<option value="all">All outcomes</option>`];
     for (const [key, band] of bandCatalog) {
       bandOptions.push(`<option value="${escapeAttr(key)}">${escapeHtml(band.label)}</option>`);
     }
@@ -134,15 +128,13 @@
     const generatedLabel = Number.isNaN(generated.getTime())
       ? "recently"
       : generated.toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
-    els.sourceNote.textContent = `${baseRows.length} applications across ${DATA.sheets.length} countries. Germany opens first. Updated ${generatedLabel}.`;
+    const dataMode = usingDatabase ? "Cloud database connected" : "Local preview mode";
+    els.sourceNote.textContent = `${dataMode}. ${baseRows.length} programs across ${DATA.sheets.length} countries. Germany opens by default. Updated ${generatedLabel}.`;
   }
 
   function bindEvents() {
     els.enterViewMode.addEventListener("click", () => enterMode("view"));
-    els.enterEditMode.addEventListener("click", openPasswordDialog);
-    els.passwordForm.addEventListener("submit", requestEditMode);
-    els.cancelPasswordButton.addEventListener("click", closePasswordDialog);
-    els.cancelPasswordAction.addEventListener("click", closePasswordDialog);
+    els.enterEditMode.addEventListener("click", requestEditMode);
     els.modeButton.addEventListener("click", () => {
       els.modeGate.hidden = false;
       document.body.classList.remove("has-entered");
@@ -186,57 +178,38 @@
     els.modeButton.textContent = mode === "edit" ? "Edit mode" : "View mode";
     els.resetButton.disabled = mode !== "edit";
     render();
-    showToast(mode === "edit" ? "Editing unlocked." : "View only mode.");
+    showToast(mode === "edit" ? "Edit mode enabled." : "View mode enabled.");
   }
 
-  function openPasswordDialog() {
-    els.passwordInput.value = "";
-    if (typeof els.passwordDialog.showModal === "function") {
-      els.passwordDialog.showModal();
-      window.setTimeout(() => els.passwordInput.focus(), 60);
-    } else {
-      els.passwordDialog.setAttribute("open", "");
-      els.passwordInput.focus();
+  async function requestEditMode() {
+    const password = window.prompt("Enter edit password.");
+    if (password === null) {
+      return;
     }
-  }
-
-  function closePasswordDialog() {
-    if (typeof els.passwordDialog.close === "function") {
-      els.passwordDialog.close();
-    } else {
-      els.passwordDialog.removeAttribute("open");
-    }
-  }
-
-  async function requestEditMode(event) {
-    event.preventDefault();
-    const password = els.passwordInput.value;
     if (!password.trim()) {
-      showToast("Enter the edit password.");
+      showToast("Password is required for edit mode.");
       return;
     }
 
     if (!usingDatabase) {
       editPassword = password;
       sessionStorage.setItem(PASSWORD_STORAGE_KEY, editPassword);
-      closePasswordDialog();
       enterMode("edit");
       return;
     }
 
-    els.unlockEditButton.disabled = true;
+    els.enterEditMode.disabled = true;
     try {
       await validateEditPassword(password);
       editPassword = password;
       sessionStorage.setItem(PASSWORD_STORAGE_KEY, editPassword);
-      closePasswordDialog();
       enterMode("edit");
     } catch (error) {
       editPassword = "";
       sessionStorage.removeItem(PASSWORD_STORAGE_KEY);
       showToast(error.message || "Wrong password.");
     } finally {
-      els.unlockEditButton.disabled = false;
+      els.enterEditMode.disabled = false;
     }
   }
 
@@ -359,26 +332,15 @@
         <button class="lane-tile tone-${escapeAttr(band.tone)} ${state.band === key ? "is-active" : ""}" data-band-filter="${escapeAttr(key)}" type="button">
           <span class="eyebrow">${escapeHtml(band.shortLabel || band.label)}</span>
           <strong>${count}</strong>
-          <p>${escapeHtml(statusHint(band))}</p>
+          <p>${escapeHtml(band.description || "Outcome from the workbook.")}</p>
         </button>
       `);
     }
     els.laneStrip.innerHTML = tiles.join("");
   }
 
-  function statusHint(band) {
-    const hints = {
-      admit: "Offer received",
-      waiting: "Submitted and waiting",
-      rejected: "Not selected",
-      skipped: "Not applying",
-      action: "Needs follow-up",
-    };
-    return hints[band.key] || band.description || "Application status";
-  }
-
   function renderResultsMeta(rows) {
-    const label = rows.length === 1 ? "1 application" : `${rows.length} applications`;
+    const label = rows.length === 1 ? "1 program" : `${rows.length} programs`;
     els.resultCount.textContent = label;
     const parts = [];
     if (state.country !== "all") {
@@ -388,30 +350,30 @@
       parts.push((bandCatalog.get(state.band) || {}).label || state.band);
     }
     if (state.query) {
-      parts.push(`Search: "${state.query}"`);
+      parts.push(`search: "${state.query}"`);
     }
     els.activeContext.textContent = parts.length
-      ? `Showing ${parts.join(" · ")}.`
-      : "Showing Germany first.";
+      ? `Filtered by ${parts.join(", ")}.`
+      : "Germany is open by default. Use country to switch into Austria, Netherlands, or all rows.";
   }
 
   function renderCards(rows) {
     if (!rows.length) {
-      els.cardsView.innerHTML = `<div class="empty-state">No applications match this view.</div>`;
+      els.cardsView.innerHTML = `<div class="empty-state">No programs match these filters.</div>`;
       return;
     }
     els.cardsView.innerHTML = rows.map(renderCard).join("");
   }
 
   function renderCard(row) {
-    const university = field(row, "university") || "University not added";
+    const university = field(row, "university") || "Untitled university";
     const course = field(row, "course") || "Course not specified";
     const enrollmentDeadline = formatDisplayDate(field(row, "enrollmentDeadline"));
     const applicationOpen = formatDisplayDate(field(row, "applicationOpen"));
     const applicationDeadline = formatDisplayDate(field(row, "deadline"));
     const dateApplied = formatDisplayDate(field(row, "dateApplied"));
     const fee = formatFee(field(row, "tuitionFeeEurosPerSem"));
-    const comments = field(row, "commentsRejectionReason") || "Not added";
+    const comments = field(row, "commentsRejectionReason") || "No entry";
     const links = row.links
       .map((link) => {
         const latestValue = row.fields[link.field];
@@ -441,18 +403,18 @@
         <dl class="detail-grid">
           ${detail("University", university, "is-wide is-primary")}
           ${detail("Course", course, "is-wide")}
-          ${detail("Applied", field(row, "applied") || "Not added")}
-          ${detail("Enrollment Deadline", enrollmentDeadline || "Not added")}
-          ${detail("Tuition Fee", fee || "Not added")}
-          ${detail("Date Applied", dateApplied || "Not added")}
-          ${detail("Application Opens", applicationOpen || "Not added")}
-          ${detail("Application Deadline", applicationDeadline || "Not added")}
+          ${detail("Applied", field(row, "applied") || "No entry")}
+          ${detail("Enrollment Deadline", enrollmentDeadline || "No date")}
+          ${detail("Tuiton Fee(Euros per sem)", fee || "No entry")}
+          ${detail("Date Applied", dateApplied || "No date")}
+          ${detail("Application open", applicationOpen || "No entry")}
+          ${detail("Application Deadline", applicationDeadline || "No date")}
           ${detail("Comments / Rejection Reason", comments, "is-wide is-comment")}
         </dl>
 
         <div class="card-actions">
           ${links}
-          ${state.mode === "edit" ? `<button class="quiet-button edit-button" type="button" data-edit-row="${escapeAttr(row.id)}">Edit details</button>` : ""}
+          ${state.mode === "edit" ? `<button class="quiet-button edit-button" type="button" data-edit-row="${escapeAttr(row.id)}">Edit</button>` : ""}
         </div>
       </article>
     `;
@@ -469,7 +431,7 @@
       return;
     }
     if (state.mode !== "edit") {
-      showToast("Switch to edit mode to change applications.");
+      showToast("Switch to edit mode to change rows.");
       return;
     }
     openEditor(button.dataset.editRow);
@@ -482,7 +444,7 @@
     }
 
     activeEditorId = rowId;
-    els.editorTitle.textContent = field(row, "university") || "University not added";
+    els.editorTitle.textContent = field(row, "university") || "Untitled university";
     els.editorMeta.textContent = row.country;
 
     const bandOptions = Array.from(bandCatalog)
@@ -492,7 +454,7 @@
     const fields = [
       `
         <div class="field-editor">
-          <label for="field-planningLane">Application status</label>
+          <label for="field-planningLane">Outcome</label>
           <select id="field-planningLane" data-band-input>${bandOptions}</select>
         </div>
       `,
@@ -504,7 +466,7 @@
           : `<input id="field-${escapeAttr(column.key)}" data-field="${escapeAttr(column.key)}" value="${escapeAttr(value)}" />`;
         return `
           <div class="field-editor ${isWide ? "is-wide" : ""}">
-            <label for="field-${escapeAttr(column.key)}">${escapeHtml(displayColumnLabel(column))}</label>
+            <label for="field-${escapeAttr(column.key)}">${escapeHtml(column.label)}</label>
             ${control}
           </div>
         `;
@@ -539,7 +501,7 @@
       if (usingDatabase) {
         const updatedRow = await saveCloudRow(activeEditorId, fields, bandKey);
         replaceRow(updatedRow);
-        showToast("Changes saved.");
+        showToast("Saved to Cloudflare D1.");
       } else {
         edits[activeEditorId] = {
           fields,
@@ -547,7 +509,7 @@
           savedAt: new Date().toISOString(),
         };
         writeEdits();
-        showToast("Changes saved locally.");
+        showToast("Saved locally. Cloudflare will store edits after deployment.");
       }
       els.editorDialog.close();
       activeEditorId = null;
@@ -561,7 +523,7 @@
 
   async function saveCloudRow(rowId, fields, bandKey) {
     if (!editPassword) {
-      throw new Error("Unlock edit mode again to save.");
+      throw new Error("Enter edit mode again to unlock saving.");
     }
 
     const headers = {
@@ -578,7 +540,7 @@
     const payload = await response.json().catch(() => ({}));
 
     if (!response.ok) {
-      throw new Error(payload.error || "Could not save this application.");
+      throw new Error(payload.error || "Could not save this row.");
     }
     return payload.row;
   }
@@ -600,27 +562,27 @@
 
   function resetEdits() {
     if (usingDatabase) {
-      showToast("Saved changes stay online. Download a copy if needed.");
+      showToast("Cloud edits are stored in D1. Re-run the seed command to restore workbook data.");
       return;
     }
     if (!Object.keys(edits).length) {
-      showToast("No changes to clear.");
+      showToast("No local edits to reset.");
       return;
     }
-    const confirmed = window.confirm("Clear saved changes and return to the original list?");
+    const confirmed = window.confirm("Reset all local edits and return to the workbook extract?");
     if (!confirmed) {
       return;
     }
     edits = {};
     writeEdits();
     render();
-    showToast("Changes cleared.");
+    showToast("Local edits cleared.");
   }
 
   function exportVisibleRows() {
     const rows = filterRows(currentRows());
     const columns = exportColumns(rows);
-    const header = ["Country", "Application status", ...columns.map(displayColumnLabel)];
+    const header = ["Country", "Outcome", ...columns.map((column) => column.label)];
     const lines = [header.map(csvCell).join(",")];
     rows.forEach((row) => {
       const values = [
@@ -639,7 +601,7 @@
     anchor.click();
     anchor.remove();
     URL.revokeObjectURL(url);
-    showToast(`Downloaded ${rows.length} applications.`);
+    showToast(`Exported ${rows.length} rows.`);
   }
 
   function exportColumns(rows) {
@@ -659,16 +621,6 @@
     });
 
     return columns.filter((column) => rows.some((row) => field(row, column.key)));
-  }
-
-  function displayColumnLabel(column) {
-    const labels = {
-      commentsRejectionReason: "Comments / Rejection Reason",
-      tuitionFeeEurosPerSem: "Tuition Fee",
-      applicationOpen: "Application Opens",
-      deadline: "Application Deadline",
-    };
-    return labels[column.key] || column.label;
   }
 
   function readEdits() {
