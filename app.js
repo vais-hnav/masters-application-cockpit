@@ -366,14 +366,14 @@
   }
 
   function renderCard(row) {
-    const university = field(row, "university") || "Untitled university";
-    const course = field(row, "course") || "Course not specified";
+    const university = displayValue(field(row, "university"));
+    const course = displayValue(field(row, "course"));
     const enrollmentDeadline = formatDisplayDate(field(row, "enrollmentDeadline"));
     const applicationOpen = formatDisplayDate(field(row, "applicationOpen"));
     const applicationDeadline = formatDisplayDate(field(row, "deadline"));
     const dateApplied = formatDisplayDate(field(row, "dateApplied"));
     const fee = formatFee(field(row, "tuitionFeeEurosPerSem"));
-    const comments = field(row, "commentsRejectionReason") || "No entry";
+    const comments = displayValue(field(row, "commentsRejectionReason"));
     const links = row.links
       .map((link) => {
         const latestValue = row.fields[link.field];
@@ -403,12 +403,12 @@
         <dl class="detail-grid">
           ${detail("University", university, "is-wide is-primary")}
           ${detail("Course", course, "is-wide")}
-          ${detail("Applied", field(row, "applied") || "No entry")}
-          ${detail("Enrollment Deadline", enrollmentDeadline || "No date")}
-          ${detail("Tuiton Fee(Euros per sem)", fee || "No entry")}
-          ${detail("Date Applied", dateApplied || "No date")}
-          ${detail("Application open", applicationOpen || "No entry")}
-          ${detail("Application Deadline", applicationDeadline || "No date")}
+          ${detail("Applied", displayValue(field(row, "applied")))}
+          ${detail("Enrollment Deadline", displayValue(enrollmentDeadline))}
+          ${detail("Tuiton Fee(Euros per sem)", displayValue(fee))}
+          ${detail("Date Applied", displayValue(dateApplied))}
+          ${detail("Application open", displayValue(applicationOpen))}
+          ${detail("Application Deadline", displayValue(applicationDeadline))}
           ${detail("Comments / Rejection Reason", comments, "is-wide is-comment")}
         </dl>
 
@@ -423,6 +423,11 @@
   function detail(label, value, className = "") {
     const classes = className ? ` ${className}` : "";
     return `<div class="detail${classes}"><dt>${escapeHtml(label)}</dt><dd>${escapeHtml(value)}</dd></div>`;
+  }
+
+  function displayValue(value) {
+    const text = String(value ?? "").trim();
+    return text || "-";
   }
 
   function openEditorFromClick(event) {
